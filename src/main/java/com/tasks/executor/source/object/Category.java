@@ -1,4 +1,4 @@
-package com.tasks.executor.source.objects;
+package com.tasks.executor.source.object;
 
 import jakarta.persistence.*;
 import lombok.Data;

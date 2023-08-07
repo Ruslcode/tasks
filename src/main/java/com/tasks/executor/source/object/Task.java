@@ -1,4 +1,4 @@
-package com.tasks.executor.source.objects;
+package com.tasks.executor.source.object;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 @NoArgsConstructor
-public class TaskEntity {
+public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")

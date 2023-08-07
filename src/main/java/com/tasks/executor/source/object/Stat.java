@@ -1,4 +1,4 @@
-package com.tasks.executor.source.objects;
+package com.tasks.executor.source.object;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode
-public class StatEntity {
+public class Stat {
     @Id
     @Column(name = "id")
     private Long id;
