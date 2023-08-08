@@ -28,8 +28,8 @@ public class Task {
     private Date date;
     @ManyToOne
     @JoinColumn(name = "priority_id", referencedColumnName = "id")
-    private Priority priorityByPriorityId;
+    private Priority priority;
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private Category categoryByCategoryId;
+    private Category category;
 }
