@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/priority")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class PriorityController {
 
     private final PriorityRepository priorityRepository;

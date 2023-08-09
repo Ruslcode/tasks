@@ -3,6 +3,7 @@ package com.tasks.executor.source.controller;
 import com.tasks.executor.source.object.Stat;
 import com.tasks.executor.source.repository.StatRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 // иначе пришлось бы выполнять лишнюю работу, использовать @ResponseBody для ответа, указывать тип отправки JSON
 // Названия методов могут быть любыми, главное не дублировать их имена и URL mapping
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class StatController {
 
     private final StatRepository statRepository; // сервис для доступа к данным (напрямую к репозиториям не обращаемся)

@@ -5,6 +5,9 @@ import com.tasks.executor.source.repository.TaskRepository;
 import com.tasks.executor.source.search.TaskSearchValues;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,7 @@ import java.util.NoSuchElementException;
 // Названия методов могут быть любыми, главное не дублировать их имена и URL mapping
 @RestController
 @RequestMapping("/task") // базовый адрес
+@CrossOrigin(origins = "http://localhost:4200")
 public class TaskController {
 
     private final TaskRepository taskRepository; // сервис для доступа к данным (напрямую к репозиториям не обращаемся)
@@ -36,7 +40,7 @@ public class TaskController {
     // получение всех данных
     @GetMapping("/all")
     public ResponseEntity<List<Task>> findAll() {
-        return  ResponseEntity.ok(taskRepository.findAll());
+        return ResponseEntity.ok(taskRepository.findAll());
     }
 
     @PostMapping("/add")
@@ -73,9 +77,9 @@ public class TaskController {
 
         try {
             taskRepository.deleteById(id);
-        }catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             e.printStackTrace();
-            return new ResponseEntity("id="+id+" not found", HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
         }
         return new ResponseEntity(HttpStatus.OK); // просто отправляем статус 200 (операция прошла успешно)
     }
@@ -85,33 +89,56 @@ public class TaskController {
     @GetMapping("/id/{id}")
     public ResponseEntity<Task> findById(@PathVariable Long id) {
         Task task = null;
-        try{
+        try {
             task = taskRepository.findById(id).get();
-        }catch (NoSuchElementException e){ // если объект не будет найден
+        } catch (NoSuchElementException e) { // если объект не будет найден
             e.printStackTrace();
-            return new ResponseEntity("id="+id+" not found", HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity("id=" + id + " not found", HttpStatus.NOT_ACCEPTABLE);
         }
 
-        return  ResponseEntity.ok(task);
+        return ResponseEntity.ok(task);
     }
 
 
     @PostMapping("/search")
-    public ResponseEntity<List<Task>> search(@RequestBody TaskSearchValues taskSearchValues) {
-
+    public ResponseEntity<Page<Task>> search(@RequestBody TaskSearchValues taskSearchValues) {
+        // исключить NullPointerException
         String text = taskSearchValues.getTitle() != null ? taskSearchValues.getTitle() : null;
 
-        Integer completed = taskSearchValues.getCompleted() != null ?  taskSearchValues.getCompleted() : null;
+        // конвертируем Boolean в Integer
+        Integer completed = taskSearchValues.getCompleted() != null ? taskSearchValues.getCompleted() : null;
 
         Long priorityId = taskSearchValues.getPriorityId() != null ? taskSearchValues.getPriorityId() : null;
         Long categoryId = taskSearchValues.getCategoryId() != null ? taskSearchValues.getCategoryId() : null;
 
+        String sortColumn = taskSearchValues.getSortColum() != null ? taskSearchValues.getSortColum() : null;
+        String sortDirection = taskSearchValues.getSortDirection() != null ? taskSearchValues.getSortDirection() : null;
 
-        // результат запроса
-        return ResponseEntity.ok(taskRepository.findByParams(text, completed, priorityId, categoryId));
+        Integer pageNumber = taskSearchValues.getPageNumber() != null ? taskSearchValues.getPageNumber() : null;
+        Integer pageSize = taskSearchValues.getPageSize() != null ? taskSearchValues.getPageSize() : null;
+        String defaultSortColumn = "priority";
+        Sort.Direction defaultSortDirection = Sort.Direction.ASC;
+
+        if (sortColumn != null && !sortColumn.isEmpty()) {
+
+            Sort.Direction direction = sortDirection == null || sortDirection.trim().length() == 0 || sortDirection.trim().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+            Sort sort = Sort.by(direction, sortColumn);
+            PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+            Page result = taskRepository.findByParams(text, completed, priorityId, categoryId, pageRequest);
+            return ResponseEntity.ok(result);
+
+        } else {
+
+            sortColumn = defaultSortColumn;
+            Sort.Direction direction = defaultSortDirection;
+            Sort sort = Sort.by(direction, sortColumn);
+            PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sort);
+            Page result = taskRepository.findByParams(text, completed, priorityId, categoryId, pageRequest);
+            return ResponseEntity.ok(result);
+        }
+
 
     }
-
 
 
 }
